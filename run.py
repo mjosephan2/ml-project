@@ -5,9 +5,11 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--train_path", "-t", required=True)
 parser.add_argument("--test_path", "-ts", required=True)
+args = parser.parse_args()
+
 if __name__ == "__main__":
-    train_path = "./data/CN/train"
-    x_test_path = "./data/CN/dev.in"
+    train_path = args.train_path
+    x_test_path = args.test_path
     x_train, y_train = preprocess_train(train_path)
     x_test = preprocess_x_test(x_test_path)
     y_pred = viterbi(x_test, x_train, y_train)
