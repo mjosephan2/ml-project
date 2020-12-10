@@ -1,4 +1,4 @@
-from .emissions_with_unk import emissions
+from emissions_with_unk import emissions
 def simple_sentiment(x_test, x_train, y_train):
     # placeholder for results
     ypreds = []
