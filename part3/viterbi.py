@@ -8,11 +8,19 @@ def viterbi(x_test, x_train, y_train):
     transitions_df = transitions(y_train)
     tags = emissions_df.index.values
 
+    #print(transitions_df)
     y_preds = []
+    number_of_data = len(x_test)
+    
+    print("Start predictions")
+    count = 1
     for words in x_test:
+        print(f"Prediction {count}")
         dp = forward(words, tags, emissions_df, transitions_df)
         result = backtracking(dp, words, tags, transitions_df)
         y_preds.append(result)
+        count+=1
+    print("Done")
     return y_preds
 
 def backtracking(dp, words, tags, transitions_df):
@@ -26,7 +34,7 @@ def backtracking(dp, words, tags, transitions_df):
     # From STOP to n
     for u in tags:
         score = dp[(n, u)] * transitions_df.loc[u, STOP]
-        if score > maximum:
+        if score >= maximum:
             maximum = score
             argmax = u
     results.append(argmax)
@@ -38,7 +46,7 @@ def backtracking(dp, words, tags, transitions_df):
         placeholder_argmax = argmax
         for u in tags:
             score = dp[(j, u)] * transitions_df.loc[u, placeholder_argmax]
-            if score > maximum:
+            if score >= maximum:
                 maximum = score
                 argmax = u
         results.append(argmax)
