@@ -1,6 +1,6 @@
 from collections import defaultdict
-from emissions_with_unk import emissions
-from transitions import transitions
+from .emissions_with_unk import emissions
+from .transitions import transitions
 
 
 def viterbi(x_test, x_train, y_train):
@@ -33,7 +33,7 @@ def backtracking(dp, words, tags, transitions_df):
 
     # From STOP to n
     for u in tags:
-        score = dp[(n, u)] * transitions_df.loc[u, STOP]
+        score = dp[(n, u)] * transitions_df.at[u, STOP]
         if score >= maximum:
             maximum = score
             argmax = u
@@ -45,7 +45,7 @@ def backtracking(dp, words, tags, transitions_df):
         maximum = 0
         placeholder_argmax = argmax
         for u in tags:
-            score = dp[(j, u)] * transitions_df.loc[u, placeholder_argmax]
+            score = dp[(j, u)] * transitions_df.at[u, placeholder_argmax]
             if score >= maximum:
                 maximum = score
                 argmax = u
@@ -72,15 +72,15 @@ def forward(words, tags, emissions_df, transitions_df):
             v_list = tags
         for u in tags:
             try:
-                b_u_o = emissions_df.loc[u,padded_words[j+1]]
+                b_u_o = emissions_df.at[u,padded_words[j+1]]
             except KeyError:
-                b_u_o = emissions_df.loc[u,UNK]
+                b_u_o = emissions_df.at[u,UNK]
             dp[(j+1, u)]=max([
-                dp[(j,v)] * b_u_o *  transitions_df.loc[v,u] for v in v_list
+                dp[(j,v)] * b_u_o *  transitions_df.at[v,u] for v in v_list
                 ])
     # Stop 
     dp[(n+1, STOP)] = max([
-        dp[(n,v)] * transitions_df.loc[v,STOP] for v in tags
+        dp[(n,v)] * transitions_df.at[v,STOP] for v in tags
     ])
     return dp
 

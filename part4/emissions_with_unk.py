@@ -32,7 +32,7 @@ def emissions(x,y, k=0.5):
         df.at[t, w] = val
     
     df = df.fillna(0)
-    print(df.info())
+    # print(df.info())
     return df
 
 if __name__ == "__main__":

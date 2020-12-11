@@ -22,17 +22,22 @@ def transitions(y):
     for (u,v), count in count_u_to_v.items():
         transitions_u_v[(u,v)] = count / count_y[u]
     
-    #transitions_u_v is a dict of form {(u,v): transition_probability}
     # turn into dataframe
     unique_tags = [START] + list(set([item for sublist in y for item in sublist])) + [STOP]
     cols = unique_tags[1:]
     rows = unique_tags[:-1]
-    df = pd.DataFrame(columns=cols, index=rows)
-    for key, val in transitions_u_v.items():
+    number_cols = len(cols)
+    number_rows = len(rows)
+    dict_col_index = {c:i for i, c in enumerate(cols)}
+    dict_row_index = {r:i for i, r in enumerate(rows)}
+    values = [[0 for c in range(number_cols)] for r in range(number_rows)]
+    #print(values)
+    for key,val in transitions_u_v.items():
         u, v = key
-        df.at[u,v] = val
-    
-    df = df.fillna(0)
+        row_index = dict_row_index[u]
+        col_index = dict_col_index[v]
+        values[row_index][col_index] = val
+    df = pd.DataFrame(data=values,columns=cols, index=rows)
     return df
 
 if __name__ == "__main__":

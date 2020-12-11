@@ -1,4 +1,4 @@
-from emissions_with_unk import emissions
+from .emissions_with_unk import emissions
 def simple_sentiment(x_test, x_train, y_train):
     # placeholder for results
     ypreds = []
@@ -12,7 +12,7 @@ def simple_sentiment(x_test, x_train, y_train):
             if w not in training_words:
                 w = 'UNK'
             # get tag with maximum emission probability
-            t = emissions_df.loc[:,w].idxmax()
+            t = emissions_df.at[:,w].idxmax()
             y.append(t)
         ypreds.append(y)
     return ypreds
@@ -35,3 +35,4 @@ if __name__ == "__main__":
         ["X","Z"]
     ]
     print(simple_sentiment([["a","d"]], x, y))
+    print(simple_sentiment([["a","d"],["word","a","b"]], x, y))

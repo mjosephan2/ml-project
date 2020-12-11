@@ -33,7 +33,7 @@ def transitions(y):
         df.at[u,v] = val
     
     df = df.fillna(0)
-    print(df.info())
+    # print(df.info())
     return df
 
 if __name__ == "__main__":

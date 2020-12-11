@@ -17,20 +17,15 @@ def emissions(x,y):
     
     # turn into dataframe
     l = list(emissions_y_to_x.keys())
-    cols = list(set([x[0] for x in l]))
-    rows = list(set([x[1] for x in l]))
-    number_cols = len(cols)
-    number_rows = len(rows)
-    dict_col_index = {c:i for i, c in enumerate(cols)}
-    dict_row_index = {r:i for i, r in enumerate(rows)}
-    values = [[0 for c in range(number_cols)] for r in range(number_rows)]
-    #print(values)
-    for k,v in emissions_y_to_x.items():
-        w, t = k
-        row_index = dict_row_index[t]
-        col_index = dict_col_index[w]
-        values[row_index][col_index] = v
-    df = pd.DataFrame(data=values,columns=cols, index=rows)
+    cols = list(set([x[0] for x in l])) #list of words without duplicates
+    rows = list(set([x[1] for x in l])) #list of tags without duplicates
+    
+    df = pd.DataFrame(index= rows, columns= cols)
+    for key,val in emissions_y_to_x.items():
+        w, t = key
+        df.at[t, w] = val
+    
+    df = df.fillna(0)
     return df
 
 if __name__ == "__main__":
