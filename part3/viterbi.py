@@ -1,6 +1,6 @@
 from collections import defaultdict
-from .emissions_with_unk import emissions
-from .transitions import transitions
+from emissions_with_unk import emissions
+from transitions import transitions
 
 
 def viterbi(x_test, x_train, y_train):
@@ -102,3 +102,5 @@ if __name__ == "__main__":
         ["X","Z"]
     ]
     print(viterbi([["a","d"], ["b"]], x, y))
+    print(viterbi([["a","d","b","c"]], x, y)) # X,X,Z,Y
+    print(viterbi([["a","d"]], x, y)) # Z,Y
