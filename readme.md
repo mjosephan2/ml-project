@@ -55,3 +55,9 @@ Replace "CN" with "EN" and "SG" to do predictions with other dataset.
 | CN | 0.0766   | 0.1729| 0.1062 |
 | EN |  0.7638   | 0.7227 |  0.7426|
 | SG | 0.2879  |0.3255 | 0.3056|
+
+## Evluation script
+Run evaluation script by going into eval folder
+```
+python evalResult.py <actual data path> <predicted data path>
+```

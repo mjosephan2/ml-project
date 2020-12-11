@@ -30,8 +30,7 @@ def transitions(y):
     df = pd.DataFrame(columns=cols, index=rows)
     for key, val in transitions_u_v.items():
         u, v = key
-        df.at[u,v] = val
-    
+        df.loc[u,v] = val
     df = df.fillna(0)
     # print(df.info())
     return df
