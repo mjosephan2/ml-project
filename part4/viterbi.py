@@ -1,6 +1,6 @@
 from collections import defaultdict
-from emissions_with_unk import emissions
-from transitions import transitions
+from .emissions_with_unk import emissions
+from .transitions import transitions
 
 
 def viterbi_top_k(x_test, x_train, y_train, top_k):
@@ -10,7 +10,6 @@ def viterbi_top_k(x_test, x_train, y_train, top_k):
 
     #print(transitions_df)
     y_preds = []
-    number_of_data = len(x_test)
     
     print("Start predictions")
     count = 1
@@ -18,64 +17,77 @@ def viterbi_top_k(x_test, x_train, y_train, top_k):
         print(f"Prediction {count}")
         dp = forward(words, tags, emissions_df, transitions_df, top_k)
         # print(dp)
-        result = backtracking(dp, words, tags, transitions_df, top_k)
+        result = backtracking(dp, words, tags, emissions_df, transitions_df,  top_k)
         # print(result)
-
-        # append kth best
-        print(result)
         y_preds.append(result[-1])
         count+=1
     print("Done")
     return y_preds
 
-def backtracking(dp, words, tags, transitions_df, top_k):
+def backtracking(dp, words, tags, emissions_df, transitions_df, top_k):
     START = "START"
     STOP = "STOP"
+    UNK = "UNK"
     n = len(words)
+    padded_words = [START] + words + [STOP]
     results = []
 
     # From STOP to n
-    trackings = dp[(n+1, STOP)]
+    for u in tags:
+        for score in dp[(n, u)]:
+            results.append((score, [u], score * transitions_df.at[u, STOP]))
+    results = sorted(results, reverse=True, key=lambda x: x[2])
+    results = results[:top_k]
 
-    # set results
-    for score, prev_tag, seq in trackings:
-        results.append([prev_tag])
     # From n to START (exclusive START)
-    for j in range(n, 1, -1):
-        new_trackings = []
-        for score, prev_tag, seq in trackings:
-            new_trackings.append(dp[(j, prev_tag)][seq])
-        
-        # update results
-        for i in range(len(new_trackings)):
-            score, prev_tag, seq = new_trackings[i]
-            results[i].append(prev_tag)
-    # reverse order
+    for j in range(n-1, 0, -1):
+        # help with gettings the latest tag
+        placeholder_argmax = [r_tags for (score_j, r_tags, _) in results]
+        temp_results = []
+
+        # loop over all possible tags
+        for u in tags:
+            # loop over the top 3 score at j
+            for score in dp[(j, u)]:
+                # loop over the top 3 tags sequence at j+1
+                for r_tags in placeholder_argmax:
+                    t = r_tags[-1]
+                    try:
+                        b_u_o = emissions_df.at[t,padded_words[j+1]]
+                    except KeyError:
+                        b_u_o = emissions_df.at[u,UNK]
+                    score_j_1 = score * transitions_df.at[u, t] * b_u_o
+                    temp_results.append((score, r_tags + [u], score_j_1))
+        new_results = []
+        # not sorting but finding closest
+        for (score_j, t, score_j_1) in results:
+            new_score_j, t, new_score_j_1 = min(temp_results, key=lambda x: abs(x[2]-score_j))
+            new_results.append((new_score_j,t, new_score_j_1))
+        results = new_results
+    output = []
     for i in range(len(results)):
-        results[i].reverse()
-    return results
+        output.append(list(reversed(results[i][1])))
+    return output
 
 def forward(words, tags, emissions_df, transitions_df, top_k):
     START = "START"
     STOP = "STOP"
     UNK = "UNK"
     dp = {}
-    # dp [(j, tag)] = (score, prev_tag, seq)
-    # seq => [0, top_k)
-    dp[(0, START)] = (1, None, None)
+    # dp [(j, tag, top_k_position)]
+    dp[(0, START)] = 1
     # ensuring that the range is from 0 to n+1
     n = len(words)
     padded_words = [START] + words + [STOP]
 
+    # top_k means k [0,top_k)
     # START loop
     for u in tags:
         try:
             b_u_o = emissions_df.at[u,padded_words[1]]
         except KeyError:
             b_u_o = emissions_df.at[u,UNK]
-        dp[(1, u)]= [
-            (dp[(0,START)][0] * b_u_o *  transitions_df.at[START,u] , START, 0)
-            ]
+        dp[(1, u)]= [dp[(0,START)] * b_u_o *  transitions_df.at[START,u]]
 
     # 0 to n-1
     for j in range(1,n):
@@ -88,18 +100,16 @@ def forward(words, tags, emissions_df, transitions_df, top_k):
                 b_u_o = emissions_df.at[u,UNK]
             sequences = []
             for v in v_list:
-                for i, (score, prev_tag, seq) in enumerate(dp[(j,v)]):
-                    # new_score, current tag, current sequence
-                    sequences.append((score * b_u_o *  transitions_df.at[v,u], v, i))
-            sequences = sorted(sequences, reverse=True, key=lambda x: x[0])
-            top_k_sequences = sequences[:top_k]
-            dp[(j+1, u)]= top_k_sequences
+                for score in dp[(j,v)]:
+                    sequences.append(score * b_u_o *  transitions_df.at[v,u])
+            sequences = sorted(sequences, reverse=True)
+            dp[(j+1, u)]= sequences[:top_k]
     # Stop
     sequences = []
     for v in tags:
-        for i, (score, prev_tag, seq) in enumerate(dp[(n,v)]):
-            sequences.append((score * transitions_df.at[v,STOP], v, i))
-    sequences = sorted(sequences, reverse=True, key=lambda x: x[0])
+        for score in dp[(n,v)]:
+            sequences.append(score * transitions_df.at[v,STOP])
+    sequences = sorted(sequences, reverse=True)
     dp[(n+1, STOP)] = sequences[:top_k]
     return dp
 
