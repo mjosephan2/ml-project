@@ -1,6 +1,6 @@
 from collections import defaultdict
-from .emissions_with_unk import emissions
-from .transitions import transitions
+from emissions_with_unk import emissions
+from transitions import transitions
 
 
 def viterbi_top_k(x_test, x_train, y_train, top_k):
@@ -22,6 +22,7 @@ def viterbi_top_k(x_test, x_train, y_train, top_k):
         # print(result)
 
         # append kth best
+        print(result)
         y_preds.append(result[-1])
         count+=1
     print("Done")
