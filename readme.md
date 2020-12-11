@@ -18,7 +18,7 @@ Replace "CN" with "EN" and "SG" to do predictions with other dataset.
 | CN | 0.0393    | 0.2386 | 0.0675 |
 | EN | 0.4534    | 0.6416 | 0.5313 |
 | SG | 0.1251   | 0.3560 | 0.1851 |
-## PART3 Viterbi Algorithm
+## PART 3 Viterbi Algorithm
 In order to run viterbi sentiment analysis predictions, use the code below
 ```
 python run.py -m viterbi -p ./data/CN
@@ -37,7 +37,7 @@ Replace "CN" with "EN" and "SG" to do predictions with other dataset.
 | EN | 0.6775    | 0.7342 |  0.7047 |
 | SG | 0.3945  | 0.4204 | 0.4070 |
 
-## PART4 Viterbi top kth Algorithm
+## PART 4 Viterbi top kth Algorithm
 In order to run viterbi 3rd best sequence sentiment analysis predictions, use the code below
 ```
 python run.py -m viterbi_top_k -p ./data/CN
